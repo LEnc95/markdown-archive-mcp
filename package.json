@@ -1,0 +1,38 @@
+{
+  "name": "markdown-archive-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for maintaining a markdown knowledge base: classify plans, archive completed/stale docs to .archiveMD/, and compact noisy files. Never deletes.",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "markdown-archive-mcp": "build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && node --test test/*.test.js && npm run check:no-delete",
+    "check:no-delete": "node scripts/check-no-delete.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "markdown",
+    "knowledge-base",
+    "archive"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
