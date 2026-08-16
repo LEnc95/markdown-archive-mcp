@@ -3,7 +3,11 @@ import { registerAnalyzePlans } from "./tools/analyzePlans.js";
 import { registerArchiveFiles } from "./tools/archiveFiles.js";
 import { registerCompactFile } from "./tools/compactFile.js";
 import { registerListRepo } from "./tools/listRepo.js";
+import { registerRestoreFiles } from "./tools/restoreFiles.js";
 import { registerUpdateFile } from "./tools/updateFile.js";
+
+export const SERVER_NAME = "markdown-archive";
+export const SERVER_VERSION = "0.2.0";
 
 /**
  * Build a configured server without binding a transport.
@@ -12,9 +16,6 @@ import { registerUpdateFile } from "./tools/updateFile.js";
  * attach an in-memory transport. Importing the stdio entry point would start listening on
  * stdin as a side effect.
  */
-export const SERVER_NAME = "markdown-archive";
-export const SERVER_VERSION = "0.1.0";
-
 export function createServer(): McpServer {
   const server = new McpServer({
     name: SERVER_NAME,
@@ -24,6 +25,7 @@ export function createServer(): McpServer {
   registerListRepo(server);
   registerAnalyzePlans(server);
   registerArchiveFiles(server);
+  registerRestoreFiles(server);
   registerCompactFile(server);
   registerUpdateFile(server);
 

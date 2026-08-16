@@ -4,22 +4,41 @@ import { ARCHIVE_DIR } from "./paths.js";
 
 export const MANIFEST_NAME = ".archive-manifest.jsonl";
 
+export type ManifestEvent = "archive" | "restore";
+
 export interface ManifestEntry {
-  /** Repo-relative posix path the file lived at before the move. */
+  /** Absent on entries written before restore existed; those are all archives. */
+  event?: ManifestEvent;
+  /** Repo-relative posix path the file moved from. */
   from: string;
-  /** Repo-relative posix path inside .archiveMD/ after the move. */
+  /** Repo-relative posix path the file moved to. */
   to: string;
   reason: string;
-  archivedAt: string;
-  /** HEAD at time of archive, when the root was a git repo with commits. */
+  /** Canonical timestamp. `archivedAt` is still written on archive entries for compatibility. */
+  at?: string;
+  archivedAt?: string;
+  /** HEAD at time of the move, when the root was a git repo with commits. */
   gitSha: string | null;
-  /** Classification that justified the move, when the caller supplied one. */
   status?: string;
   confidence?: string;
 }
 
+/** An entry with the optional fields resolved, so callers do not each handle the fallbacks. */
+export interface NormalizedEntry extends ManifestEntry {
+  event: ManifestEvent;
+  at: string;
+}
+
 export function manifestPath(root: string): string {
   return path.join(root, ARCHIVE_DIR, MANIFEST_NAME);
+}
+
+export function normalizeEntry(entry: ManifestEntry): NormalizedEntry {
+  return {
+    ...entry,
+    event: entry.event ?? "archive",
+    at: entry.at ?? entry.archivedAt ?? "",
+  };
 }
 
 /**
@@ -37,20 +56,37 @@ export async function appendManifest(root: string, entries: ManifestEntry[]): Pr
   await fs.appendFile(target, payload, "utf8");
 }
 
-export async function readManifest(root: string): Promise<ManifestEntry[]> {
+export async function readManifest(root: string): Promise<NormalizedEntry[]> {
   const target = manifestPath(root);
   const raw = await fs.readFile(target, "utf8").catch(() => null);
   if (raw === null) return [];
 
-  const entries: ManifestEntry[] = [];
+  const entries: NormalizedEntry[] = [];
   for (const line of raw.split(/\r?\n/)) {
     if (line.trim() === "") continue;
     try {
-      entries.push(JSON.parse(line) as ManifestEntry);
+      entries.push(normalizeEntry(JSON.parse(line) as ManifestEntry));
     } catch {
       // A truncated tail line is expected after an interrupted write; skip it rather than
       // failing the whole read.
     }
   }
   return entries;
+}
+
+/**
+ * Most recent archive of a file, looked up by either the path it came from or the path it
+ * now sits at. Searched newest-first so a file archived, restored, and archived again
+ * resolves to the copy currently in the archive.
+ */
+export function findArchiveEntry(
+  entries: NormalizedEntry[],
+  candidate: string
+): NormalizedEntry | null {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (entry.event !== "archive") continue;
+    if (entry.to === candidate || entry.from === candidate) return entry;
+  }
+  return null;
 }

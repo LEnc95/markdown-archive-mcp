@@ -34,9 +34,10 @@ fixture that exercises it and assert on both the status and the confidence — a
 the label right for the wrong reason will drift.
 
 ```bash
-npm test                                  # typecheck, 38 tests, no-delete check
-node scripts/report.mjs <path-to-kb>      # read-only report against a real KB
-node scripts/smoke.mjs <src-kb> <workdir> # full round trip against a throwaway copy
+npm test                                          # typecheck, 52 tests, no-delete check
+node scripts/report.mjs <path-to-kb>              # read-only report against a real KB
+node scripts/smoke.mjs <src-kb> <workdir>         # analyze/archive/compact against a copy
+node scripts/smoke-restore.mjs <src-kb> <workdir> # archive/restore round trip against a copy
 ```
 
 Never point `smoke.mjs` at a knowledge base you care about — it copies first, but

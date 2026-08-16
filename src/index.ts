@@ -24,6 +24,7 @@ Tools (each takes an absolute root_path):
   md_list_repo       list markdown files with size and last-touched date
   md_analyze_plans   classify as ACTIVE/COMPLETED/STALE/UNKNOWN, with evidence
   md_archive_files   move explicit paths into .archiveMD/, never deleting
+  md_restore_files   move files back out of .archiveMD/ to where they came from
   md_compact_file    return a compacted version without writing it
   md_update_file     write a change and report a diff summary
 

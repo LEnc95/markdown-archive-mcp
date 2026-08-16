@@ -42,7 +42,7 @@ async function call(name, args) {
   };
 }
 
-test("all five specified tools are registered", async () => {
+test("the full tool set is registered", async () => {
   const { tools } = await client.listTools();
   const names = tools.map((t) => t.name).sort();
   assert.deepEqual(names, [
@@ -50,6 +50,7 @@ test("all five specified tools are registered", async () => {
     "md_archive_files",
     "md_compact_file",
     "md_list_repo",
+    "md_restore_files",
     "md_update_file",
   ]);
 });

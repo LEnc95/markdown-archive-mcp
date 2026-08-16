@@ -47,10 +47,31 @@ Then just ask: *"analyze the plans in ./docs and tell me what's safe to archive.
 | `md_list_repo` | no | List `.md` files with size, last-touched date, heading count |
 | `md_analyze_plans` | no | Classify as ACTIVE / COMPLETED / STALE / UNKNOWN with evidence |
 | `md_archive_files` | moves | Move explicit paths into `.archiveMD/`, recording each in the manifest |
+| `md_restore_files` | moves | Move files back out of `.archiveMD/` to where they came from |
 | `md_compact_file` | no | Return a compacted version without writing it |
 | `md_update_file` | yes | Write a change and report a high-level diff summary |
 
 Every tool takes an absolute `root_path`.
+
+## Undoing an archive
+
+`md_restore_files` reverses an archive using the manifest, so you can refer to a file by
+either the path it was archived to or the path it came from — `docs/plans/foo.md` and
+`.archiveMD/docs/plans/foo.md` both work.
+
+Called with no `paths`, it lists what can be restored and moves nothing. Defaulting a
+malformed call to "restore everything" would be exactly the wrong failure mode:
+
+> *"what's in the archive?"* → lists each archived file with its original path, the reason it
+> was archived, when, and whether something now occupies its old location.
+
+If a file already sits at the original path, the restore is **skipped** rather than
+overwriting current work. Pass `on_conflict: "suffix"` to bring the archived copy back
+alongside it instead. Restores are appended to the manifest too, so the audit trail records
+the round trip.
+
+Files moved into `.archiveMD/` by hand still restore — without a manifest entry, the original
+location is derived by stripping the archive prefix.
 
 ## Classification
 
@@ -131,10 +152,10 @@ npm install && npm run build && npm test
 
 ## Known gaps
 
-- **No restore tool.** The manifest records everything needed to undo an archive, but
-  `md_restore_files` is not implemented yet.
 - **No `patch` update mode.** Applying natural-language patch instructions needs a model; a
   caller that wants a partial edit should compute the new content and use `replace`.
+- **Empty directories linger in `.archiveMD/` after a restore.** Removing them would mean a
+  delete call, and the no-delete guarantee is worth more than the tidiness.
 
 ## License
 
