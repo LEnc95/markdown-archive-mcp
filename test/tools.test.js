@@ -96,14 +96,26 @@ test("a relative root_path is rejected", async () => {
   assert.match(text, /absolute/i);
 });
 
-test("paths outside root_path are refused", async () => {
+test("traversal outside root_path is refused", async () => {
   const { data } = await call("md_archive_files", {
     root_path: kb,
-    paths: ["../../../etc/hosts", "..\\..\\escape.md"],
+    paths: ["../../../etc/hosts", "../escaped.md", "docs/../../outside.md"],
   });
   assert.equal(data.moved_count, 0);
-  assert.equal(data.skipped.length, 2);
+  assert.equal(data.skipped.length, 3);
   assert.ok(data.skipped.every((s) => /escapes root_path/.test(s.reason)));
+});
+
+test("a backslash path is contained on every platform", async () => {
+  // On Windows this is traversal; on POSIX a backslash is a legal filename character, so it
+  // resolves to an odd name inside root instead. Either way nothing may move.
+  const { data } = await call("md_archive_files", {
+    root_path: kb,
+    paths: ["..\\..\\escape.md"],
+  });
+  assert.equal(data.moved_count, 0);
+  assert.equal(data.skipped.length, 1);
+  assert.match(data.skipped[0].reason, /escapes root_path|does not exist/);
 });
 
 test("dry_run reports the move without touching the filesystem", async () => {
