@@ -1,23 +1,44 @@
 # markdown-archive
 
+[![CI](https://github.com/LEnc95/markdown-archive-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/LEnc95/markdown-archive-mcp/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/markdown-archive-mcp.svg)](https://www.npmjs.com/package/markdown-archive-mcp)
+
 An MCP server for maintaining a markdown knowledge base: classify plans, archive completed
 docs into a `.archiveMD/` recycle bin, and compact noisy files.
 
 **It never deletes anything.** Archiving is a move, collisions get a timestamp suffix instead
-of an overwrite, and every move is recorded in a manifest. `npm run check:no-delete` fails the
+of an overwrite, and every move is recorded in a manifest. A check in the test suite fails the
 build if a delete call ever appears in `src/`.
 
-## Install
+Point it at any directory of markdown — a docs folder, a plans directory, an Obsidian vault.
+There is no default path and no hardcoded knowledge base.
+
+## Quick start
+
+### Claude Code
 
 ```bash
-npm install && npm run build
+claude mcp add --scope user markdown-archive -- npx -y markdown-archive-mcp
 ```
 
-Register it (the server takes `root_path` per call, so one registration covers every repo):
+### Any MCP client
 
-```bash
-claude mcp add markdown-archive -- node "C:/Users/Luke/Documents/GitHub/ArchiveMD/build/index.js"
+Add to your client's server config (`.mcp.json`, `claude_desktop_config.json`, or equivalent):
+
+```json
+{
+  "mcpServers": {
+    "markdown-archive": {
+      "command": "npx",
+      "args": ["-y", "markdown-archive-mcp"]
+    }
+  }
+}
 ```
+
+Commit that file to a repo and everyone who clones it gets the server, no setup required.
+
+Then just ask: *"analyze the plans in ./docs and tell me what's safe to archive."*
 
 ## Tools
 
@@ -29,7 +50,7 @@ claude mcp add markdown-archive -- node "C:/Users/Luke/Documents/GitHub/ArchiveM
 | `md_compact_file` | no | Return a compacted version without writing it |
 | `md_update_file` | yes | Write a change and report a high-level diff summary |
 
-Every tool takes an absolute `root_path`. There is no default and no hardcoded knowledge base.
+Every tool takes an absolute `root_path`.
 
 ## Classification
 
@@ -49,9 +70,10 @@ Three rules keep it conservative:
   open checkboxes comes back `ACTIVE`, `mixed: true` — a question for a human, not a move.
 - **Age alone never proposes an archive.** Only `COMPLETED` files land in
   `archive_candidates`; merely-old files go to `stale_review`. Reference documentation is
-  untouched for years precisely because it is stable and correct.
+  untouched for years precisely because it is stable and correct. An early build of this
+  server ignored that and proposed archiving 65 of 67 files in a healthy docs tree.
 
-Results are grouped for you:
+Results come grouped:
 
 - `archive_candidates` — COMPLETED, consistent signals. Safe to propose.
 - `stale_review` — old, but with no completion evidence. Your call.
@@ -63,18 +85,16 @@ Results are grouped for you:
 removes duplicated prose blocks. It does **not** rewrite prose — that needs a language model,
 and this is plain code.
 
-So it returns `new_content` and never writes. Read it, summarize further yourself if the
-structural pass was not enough, then write your version with `md_update_file`. Frontmatter,
-the H1, and Status / Decision / Current State / Next Steps sections are always preserved
-verbatim.
+So it returns `new_content` and never writes. Your client reads it, summarizes further if the
+structural pass was not enough, then writes the result with `md_update_file`. Frontmatter, the
+H1, and Status / Decision / Current State / Next Steps sections are always preserved verbatim.
 
-Log sections are assumed newest-first (Keep a Changelog style). Pass
-`history_order: "last"` for append-at-the-bottom logs — guessing wrong would discard exactly
-the entries worth keeping.
+Log sections are assumed newest-first (Keep a Changelog style). Pass `history_order: "last"`
+for append-at-the-bottom logs — guessing wrong would discard exactly the entries worth keeping.
 
 ## Safety
 
-- **Never deletes.** Enforced by `npm run check:no-delete`, which is part of `npm test`.
+- **Never deletes.** Enforced by `npm run check:no-delete`, part of `npm test`.
 - **Path containment.** Every path is resolved against `root_path` and rejected if it escapes,
   lexically and after following symlinks.
 - **No globs.** `md_archive_files` takes explicit paths only, and refuses batches over
@@ -86,19 +106,27 @@ the entries worth keeping.
   `md_archive_files` returns `git_backed: false` and says so in `warnings`.
 - `.archiveMD/` is excluded from listing and analysis by default.
 
-## Development
+## Running it directly
+
+The server speaks MCP on stdio and is meant to be launched by a client, but it explains itself
+if you run it by hand:
 
 ```bash
-npm test
+npx markdown-archive-mcp --help
 ```
 
-Runs the typecheck, 38 tests (classification heuristics, compaction, path containment,
-archive collision handling, dry runs), and the no-delete check.
-
-An end-to-end run against a throwaway copy of a real knowledge base:
+From a clone, a read-only report that is always safe to run against a live knowledge base:
 
 ```bash
-node scripts/smoke.mjs <source-kb> <workspace>
+node scripts/report.mjs /path/to/kb
+```
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+```bash
+npm install && npm run build && npm test
 ```
 
 ## Known gaps
@@ -107,3 +135,7 @@ node scripts/smoke.mjs <source-kb> <workspace>
   `md_restore_files` is not implemented yet.
 - **No `patch` update mode.** Applying natural-language patch instructions needs a model; a
   caller that wants a partial edit should compute the new content and use `replace`.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

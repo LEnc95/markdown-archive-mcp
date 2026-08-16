@@ -1,7 +1,7 @@
 {
   "name": "markdown-archive-mcp",
   "version": "0.1.0",
-  "description": "MCP server for maintaining a markdown knowledge base: classify plans, archive completed/stale docs to .archiveMD/, and compact noisy files. Never deletes.",
+  "description": "MCP server for maintaining a markdown knowledge base: classify plans, archive completed docs to .archiveMD/, and compact noisy files. Never deletes.",
   "type": "module",
   "main": "build/index.js",
   "bin": {
@@ -10,22 +10,40 @@
   "files": [
     "build"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js",
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "npm run typecheck && node --test test/*.test.js && npm run check:no-delete",
-    "check:no-delete": "node scripts/check-no-delete.mjs"
+    "check:no-delete": "node scripts/check-no-delete.mjs",
+    "report": "node scripts/report.mjs",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
+    "claude",
+    "claude-code",
     "markdown",
     "knowledge-base",
-    "archive"
+    "documentation",
+    "archive",
+    "second-brain"
   ],
+  "author": "Luke Encrapera",
   "license": "MIT",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LEnc95/markdown-archive-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LEnc95/markdown-archive-mcp/issues"
+  },
+  "homepage": "https://github.com/LEnc95/markdown-archive-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "zod": "^3.23.8"

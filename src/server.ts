@@ -12,10 +12,13 @@ import { registerUpdateFile } from "./tools/updateFile.js";
  * attach an in-memory transport. Importing the stdio entry point would start listening on
  * stdin as a side effect.
  */
+export const SERVER_NAME = "markdown-archive";
+export const SERVER_VERSION = "0.1.0";
+
 export function createServer(): McpServer {
   const server = new McpServer({
-    name: "markdown-archive",
-    version: "0.1.0",
+    name: SERVER_NAME,
+    version: SERVER_VERSION,
   });
 
   registerListRepo(server);
