@@ -1,6 +1,6 @@
 {
   "name": "markdown-archive-mcp",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "MCP server for maintaining a markdown knowledge base: classify plans, archive completed docs to .archiveMD/, restore anything archived by mistake, and compact noisy files. Never deletes.",
   "type": "module",
   "main": "build/index.js",

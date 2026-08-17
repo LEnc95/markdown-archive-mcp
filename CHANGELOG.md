@@ -7,6 +7,32 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-08-17
+
+The server is unchanged — nothing under `src/` differs from 0.2.2. This release exists to get
+the corrected description onto the npm page, which renders it from the published tarball
+rather than from the repository.
+
+### Changed
+
+- The one-line description now mentions restoring. It previously listed classify, archive, and
+  compact, so a reader of the npm page or repository header could not tell the server can undo
+  an archive. `md_restore_files` has existed since 0.2.0.
+
+### Internal
+
+- Trusted publishing works. `registry-url` on `actions/setup-node` was writing an `.npmrc`
+  containing `_authToken=${NODE_AUTH_TOKEN}`; with no token configured, npm read that empty
+  value as configured credentials and never attempted the OIDC exchange. See
+  [actions/setup-node#1551](https://github.com/actions/setup-node/issues/1551).
+- The publish workflow checks out the release tag explicitly, so a provenance attestation
+  always points at the commit the release claims to ship rather than at a branch head.
+- Added a diagnostics step to the publish workflow. npm reports every trusted-publishing
+  misconfiguration as a `404` or `ENEEDAUTH`, which is indistinguishable from a missing
+  package or a forgotten login
+  ([npm/cli#9088](https://github.com/npm/cli/issues/9088)); the step reports whether the job
+  can mint an OIDC token and whether a stray credential is suppressing the exchange.
+
 ## [0.2.2] - 2026-08-17
 
 No change to the server itself — nothing under `src/` differs from 0.2.1. This is the first
@@ -106,7 +132,8 @@ Initial public release.
 - Compaction is structural, not semantic. It never rewrites prose and never writes to disk;
   the caller reviews the returned content and writes it with `md_update_file`.
 
-[Unreleased]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.1.0...v0.2.0
