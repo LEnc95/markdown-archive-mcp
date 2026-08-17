@@ -54,5 +54,30 @@ jobs:
         if: github.event_name == 'release'
         run: node scripts/check-version.mjs --tag "${{ github.event.release.tag_name }}"
 
+      # npm reports every trusted-publishing misconfiguration as a 404 on PUT, which is
+      # indistinguishable from a missing package (npm/cli#9088). These few lines separate
+      # "the job cannot mint an OIDC token" from "npm rejected the token" from "a stray
+      # credential suppressed the exchange". Values are redacted; only presence is reported.
+      - name: Diagnose trusted publishing prerequisites
+        run: |
+          echo "npm $(npm --version), node $(node --version)"
+          echo "registry: $(npm config get registry)"
+          echo "userconfig: ${NPM_CONFIG_USERCONFIG:-<unset>}"
+          if [ -n "${NPM_CONFIG_USERCONFIG:-}" ] && [ -f "$NPM_CONFIG_USERCONFIG" ]; then
+            echo "--- userconfig, values redacted ---"
+            sed -E 's/(_authToken|_auth|_password)=.*/\1=<redacted>/' "$NPM_CONFIG_USERCONFIG"
+            echo "--- end ---"
+            if grep -q "_authToken" "$NPM_CONFIG_USERCONFIG"; then
+              echo "PROBLEM: an _authToken line is present; npm will use it instead of OIDC"
+            else
+              echo "no _authToken line, good"
+            fi
+          fi
+          if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "OIDC token minting available to this job: yes"
+          else
+            echo "OIDC token minting available to this job: NO — id-token: write is not in effect"
+          fi
+
       # Provenance attestations are published automatically under trusted publishing.
       - run: npm publish
