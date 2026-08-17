@@ -7,13 +7,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-08-17
+
+No change to the server itself — nothing under `src/` differs from 0.2.1. This is the first
+release published from CI, so it is also the first to carry a
+[provenance attestation](https://docs.npmjs.com/generating-provenance-statements) linking the
+published tarball to the commit it was built from. That is the only reason to prefer it over
+0.2.1.
+
 ### Internal
 
 - Publishing moved to GitHub Actions via
   [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/). Cutting a GitHub
   release is now the only publish step; the workflow exchanges a short-lived OIDC token for
   publish rights, so no npm token exists anywhere and no 2FA prompt interrupts a release.
-  Provenance attestations are generated automatically.
 - `check:version` accepts `--tag`, asserting a release tag matches `package.json` before
   anything is pushed to npm. A version, once published, cannot be reused.
 
@@ -99,7 +106,8 @@ Initial public release.
 - Compaction is structural, not semantic. It never rewrites prose and never writes to disk;
   the caller reviews the returned content and writes it with `md_update_file`.
 
-[Unreleased]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/LEnc95/markdown-archive-mcp/releases/tag/v0.1.0
