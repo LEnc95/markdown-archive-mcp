@@ -42,3 +42,31 @@ node scripts/smoke-restore.mjs <src-kb> <workdir> # archive/restore round trip a
 
 Never point `smoke.mjs` at a knowledge base you care about — it copies first, but
 `report.mjs` is the one that is safe by construction.
+
+## Releasing
+
+Order matters: the tag should point at the commit that was published, and the changelog
+should be written before the tag rather than after.
+
+1. Bump the version in **two** places — `package.json` and `SERVER_VERSION` in
+   `src/server.ts`. They are asserted against each other by nothing, so a mismatch shows up
+   as a client reporting the wrong version.
+2. Move the `Unreleased` section of `CHANGELOG.md` under a new version heading with today's
+   date, and update the link definitions at the bottom.
+3. `npm test` — `prepublishOnly` runs it again, but failing early is cheaper.
+4. Commit, push, and let CI go green across all six platform/Node combinations.
+5. Tag and push:
+
+   ```bash
+   git tag -a v0.0.0 -m "v0.0.0"
+   git push origin v0.0.0
+   ```
+
+6. `npm publish` — requires an npm token with write access to `markdown-archive-mcp`.
+7. `gh release create v0.0.0 --notes-from-tag` (or `--notes-file` with the changelog section).
+
+Verify the published artifact actually runs, from outside the repo, before announcing it:
+
+```bash
+npx -y markdown-archive-mcp@latest --version
+```

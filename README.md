@@ -142,6 +142,19 @@ From a clone, a read-only report that is always safe to run against a live knowl
 node scripts/report.mjs /path/to/kb
 ```
 
+## Updating
+
+The server runs as a subprocess your MCP client spawns at startup, so updates take effect on
+the next session, not the current one. With the `npx` install above, restarting the client is
+enough — npx resolves the latest published version. To force it past a stale cache:
+
+```bash
+npx -y markdown-archive-mcp@latest --version
+```
+
+Teams sharing a `.mcp.json` may prefer pinning an exact version there and bumping it
+deliberately. See [CHANGELOG.md](CHANGELOG.md) for what each release changed.
+
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
