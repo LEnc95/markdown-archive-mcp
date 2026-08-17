@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-16
+
+No functional change. The published package is identical to 0.2.0 apart from the version it
+reports — `scripts/` is not part of the npm tarball, so there is no reason to update for this
+release alone.
+
 ### Internal
 
 - `scripts/check-version.mjs`, wired into `npm test` — asserts the version in `package.json`
@@ -83,6 +89,7 @@ Initial public release.
 - Compaction is structural, not semantic. It never rewrites prose and never writes to disk;
   the caller reviews the returned content and writes it with `md_update_file`.
 
-[Unreleased]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/LEnc95/markdown-archive-mcp/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/LEnc95/markdown-archive-mcp/releases/tag/v0.1.0

@@ -7,7 +7,7 @@ import { registerRestoreFiles } from "./tools/restoreFiles.js";
 import { registerUpdateFile } from "./tools/updateFile.js";
 
 export const SERVER_NAME = "markdown-archive";
-export const SERVER_VERSION = "0.2.0";
+export const SERVER_VERSION = "0.2.1";
 
 /**
  * Build a configured server without binding a transport.
