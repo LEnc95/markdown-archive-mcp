@@ -4,7 +4,8 @@
 [![npm](https://img.shields.io/npm/v/markdown-archive-mcp.svg)](https://www.npmjs.com/package/markdown-archive-mcp)
 
 An MCP server for maintaining a markdown knowledge base: classify plans, archive completed
-docs into a `.archiveMD/` recycle bin, and compact noisy files.
+docs into a `.archiveMD/` recycle bin, restore anything archived by mistake, and compact
+noisy files.
 
 **It never deletes anything.** Archiving is a move, collisions get a timestamp suffix instead
 of an overwrite, and every move is recorded in a manifest. A check in the test suite fails the
