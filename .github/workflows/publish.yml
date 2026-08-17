@@ -20,13 +20,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Build the tagged commit, not the branch head, so the provenance attestation
+          # points at exactly what the release claims to ship.
+          ref: ${{ github.event.release.tag_name || github.ref }}
 
       - uses: actions/setup-node@v7
         with:
           # Trusted publishing needs Node >= 22.14.0.
           node-version: 22
-          registry-url: https://registry.npmjs.org
           cache: npm
+          # Deliberately NO registry-url. Setting it makes setup-node write an .npmrc
+          # containing `_authToken=${NODE_AUTH_TOKEN}`; with no token configured — the whole
+          # point of trusted publishing — that resolves to an empty string, npm treats the
+          # package as authenticated-but-unauthorized, and never attempts the OIDC exchange.
+          # It fails as a 404 on PUT, which looks like a missing package rather than an auth
+          # problem. See actions/setup-node#1551. npm defaults to registry.npmjs.org anyway.
 
       # The npm bundled with Node 22 predates trusted publishing, which needs >= 11.5.1.
       - name: Ensure npm supports trusted publishing
