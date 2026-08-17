@@ -18,8 +18,9 @@
     "start": "node build/index.js",
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && node --test && npm run check:no-delete",
+    "test": "npm run typecheck && node --test && npm run check:no-delete && npm run check:version",
     "check:no-delete": "node scripts/check-no-delete.mjs",
+    "check:version": "node scripts/check-version.mjs",
     "report": "node scripts/report.mjs",
     "prepublishOnly": "npm run build && npm test"
   },

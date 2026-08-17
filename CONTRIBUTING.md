@@ -49,10 +49,12 @@ Order matters: the tag should point at the commit that was published, and the ch
 should be written before the tag rather than after.
 
 1. Bump the version in **two** places — `package.json` and `SERVER_VERSION` in
-   `src/server.ts`. They are asserted against each other by nothing, so a mismatch shows up
-   as a client reporting the wrong version.
+   `src/server.ts`. A mismatch shows up as a client reporting a version that was never
+   released; `npm run check:version` catches it before that happens.
 2. Move the `Unreleased` section of `CHANGELOG.md` under a new version heading with today's
-   date, and update the link definitions at the bottom.
+   date, and update the link definitions at the bottom. `check:version` also fails when the
+   changelog has no entry for the current version, which is why this step comes before the
+   tag rather than after.
 3. `npm test` — `prepublishOnly` runs it again, but failing early is cheaper.
 4. Commit, push, and let CI go green across all six platform/Node combinations.
 5. Tag and push:

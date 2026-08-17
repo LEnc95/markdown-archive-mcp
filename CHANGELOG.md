@@ -7,6 +7,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Internal
+
+- `scripts/check-version.mjs`, wired into `npm test` — asserts the version in `package.json`
+  matches `SERVER_VERSION` in `src/server.ts`, and that the changelog documents it. Nothing
+  linked those before, so a partial bump would ship a server reporting a version that was
+  never released.
+
 ## [0.2.0] - 2026-08-16
 
 ### Added
