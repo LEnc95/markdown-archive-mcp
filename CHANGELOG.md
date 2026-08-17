@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Internal
+
+- Publishing moved to GitHub Actions via
+  [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/). Cutting a GitHub
+  release is now the only publish step; the workflow exchanges a short-lived OIDC token for
+  publish rights, so no npm token exists anywhere and no 2FA prompt interrupts a release.
+  Provenance attestations are generated automatically.
+- `check:version` accepts `--tag`, asserting a release tag matches `package.json` before
+  anything is pushed to npm. A version, once published, cannot be reused.
+
 ## [0.2.1] - 2026-08-16
 
 No functional change. The published package is identical to 0.2.0 apart from the version it

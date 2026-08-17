@@ -9,6 +9,9 @@
  *
  * Also checks the changelog has an entry for the current version, which enforces the release
  * order documented in CONTRIBUTING.md: bump, then write the entry, then tag.
+ *
+ * Pass --tag v1.2.3 to additionally assert a git tag matches. The publish workflow uses this
+ * so a release cut from the wrong tag cannot push a mismatched version to npm.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -16,6 +19,9 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
+
+const tagIndex = process.argv.indexOf("--tag");
+const tag = tagIndex === -1 ? null : process.argv[tagIndex + 1];
 
 const problems = [];
 
@@ -52,10 +58,24 @@ if (fs.existsSync(path.join(root, "CHANGELOG.md"))) {
   }
 }
 
+// Only checked when a tag is supplied, so local runs stay tag-agnostic.
+if (tag) {
+  const tagVersion = tag.replace(/^v/, "");
+  if (tagVersion !== pkgVersion) {
+    problems.push(
+      `tag does not match the package version:\n` +
+        `    git tag           ${tag}\n` +
+        `    package.json      ${pkgVersion}\n` +
+        `  Publishing this would push a version the tag does not describe.`
+    );
+  }
+}
+
 if (problems.length > 0) {
   console.error("check:version FAILED\n");
   for (const problem of problems) console.error(`  ${problem}\n`);
   process.exit(1);
 }
 
-console.log(`check:version passed — ${pkgVersion} consistent across package.json, server, changelog`);
+const scope = tag ? `package.json, server, changelog, tag ${tag}` : "package.json, server, changelog";
+console.log(`check:version passed — ${pkgVersion} consistent across ${scope}`);

@@ -64,8 +64,32 @@ should be written before the tag rather than after.
    git push origin v0.0.0
    ```
 
-6. `npm publish` — requires an npm token with write access to `markdown-archive-mcp`.
-7. `gh release create v0.0.0 --notes-from-tag` (or `--notes-file` with the changelog section).
+6. Publish the GitHub release. That is the trigger — `.github/workflows/publish.yml` runs the
+   tests again, asserts the tag matches `package.json`, and publishes to npm.
+
+   ```bash
+   gh release create v0.0.0 --notes-file notes.md
+   ```
+
+Nobody publishes from a laptop, and no npm token exists anywhere. Authentication is
+[npm trusted publishing](https://docs.npmjs.com/trusted-publishers/): the workflow exchanges a
+short-lived GitHub OIDC token for publish rights, which is why there is no 2FA prompt and no
+secret to leak or rotate. Provenance attestations are generated automatically.
+
+### One-time setup on npmjs.com
+
+Under the package's **Settings → Trusted Publisher**, add a GitHub Actions publisher:
+
+| Field | Value |
+|---|---|
+| Organization or user | `LEnc95` |
+| Repository | `markdown-archive-mcp` |
+| Workflow filename | `publish.yml` |
+| Environment | *(leave empty)* |
+| Allowed actions | `npm publish` |
+
+Requires npm CLI ≥ 11.5.1 and Node ≥ 22.14.0, both handled by the workflow. Trusted publisher
+configurations created after 20 May 2026 must select at least one allowed action explicitly.
 
 Verify the published artifact actually runs, from outside the repo, before announcing it:
 

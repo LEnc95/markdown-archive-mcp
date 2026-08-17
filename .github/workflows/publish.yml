@@ -1,0 +1,49 @@
+name: Publish
+
+# Publishing a GitHub release is the trigger, so cutting a release is the single action that
+# ships a version. Nothing here holds an npm token: authentication is npm trusted publishing,
+# which exchanges a short-lived GitHub OIDC token for publish rights. That is also why no 2FA
+# prompt appears — there is no long-lived credential to protect.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required for trusted publishing. Without it the OIDC exchange fails.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # Trusted publishing needs Node >= 22.14.0.
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      # The npm bundled with Node 22 predates trusted publishing, which needs >= 11.5.1.
+      - name: Ensure npm supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - run: npm ci
+      - run: npm run build
+
+      # The full matrix already ran on push; this is the last gate before something
+      # irreversible. npm versions cannot be re-published once taken.
+      - run: npm test
+
+      - name: Verify the release tag matches the package version
+        if: github.event_name == 'release'
+        run: node scripts/check-version.mjs --tag "${{ github.event.release.tag_name }}"
+
+      # Provenance attestations are published automatically under trusted publishing.
+      - run: npm publish
